@@ -1,0 +1,30 @@
+version: ‘1.0’
+
+steps:
+
+ BuildingDockerImage:
+    title: Building Docker Image
+    type: build
+    image_name: test
+    working_directory: ./
+    dockerfile: Dockerfile
+    tag: ‘${{CF_BRANCH_TAG_NORMALIZED}}’
+    metadata:
+      set:
+        - commit_url: ‘${{CF_COMMIT_URL}}’
+        - note: ‘this image is ok’
+
+  perform_tests:
+    image: ${{build-image}}
+    working_directory: IMAGE_WORK_DIR
+    description: Performing unit tests...
+    commands:
+       -  echo test
+
+
+  PushingToDockerRegistry:
+    title: Pushing to Docker Registry
+    type: push
+    candidate: ‘${{BuildingDockerImage}}’
+    tag: ‘${{CF_BRANCH_TAG_NORMALIZED}}’
+    registry: cfcr
